@@ -24,7 +24,7 @@ def classify0(intX, dataSet, labels, k):
         classLabel = sortedDisIndices[i]
         # classLabel = labels[sortedDisIndices[i]]  # 书上
         classCount[classLabel] = classCount.get(classLabel, 0) + 1
-    # sorted(iterable, cmp=None, key=None, reverse=False)
+    # sorted(iterable, cmp=None, key=None, reverse=False) 使用key可以取代传入比较函数
     sortedClassCount = sorted(classCount.items(), key=operator.itemgetter(1),reverse=True)
     return labels[sortedClassCount[0][0]]
     # return sortedClassCount[0][0] # 书上
@@ -42,7 +42,7 @@ def classifiedByCosineDis(inX, dataSet, labels, k):
     # print(1/testDataNorm)
     # print(dataSetNorm)
     cosineDis = -1 * ((testData * dataSet).sum(axis=1) / (testDataNorm * dataSetNorm + 1))  
-    # 此处余弦相似度乘以-1是为了排序方便；分母加1为了解决分母出现0的情况.
+    # 此处余弦相似度乘以-1是为了排序方便；分母加1为了解决分母出现0的情况,其中加1操作不会影响到最终的结果.
     sortedCosineDis = cosineDis.argsort()
     classCount = {}
     for i in range(k):
@@ -50,6 +50,20 @@ def classifiedByCosineDis(inX, dataSet, labels, k):
         classCount[classLabel] = classCount.get(classLabel, 0) + 1
     sortedClassCount = sorted(classCount.items(), key=operator.itemgetter(1), reverse=True)
     return sortedClassCount[0][0]
+
+
+# 对数据进行归一化处理,统一不同数据信息的范围
+# 归一化的操作为 (value - min) / (max - min)
+def autoNorm(dataSet):
+    # ndarray.min(axis=None, out=None, keepdims=False, initial=<no value>, where=True)
+    dataMin = dataSet.min(0)    
+    dataMax = dataSet.max(0)    
+    dataRange = dataMax - dataMin   # 此时的维度与原始数据不同,需要进行惟独的扩展
+    dataRange = np.tile(dataRange, (dataSet.shape[0], 1))
+    dataMin = np.tile(dataMin, (dataSet.shape[0], 1))
+    dataSetNorm = (dataSet - dataMin) / dataRange
+    print(dataSetNorm)
+    return dataSetNorm
 
 
 def test1():
