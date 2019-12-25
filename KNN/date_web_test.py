@@ -13,8 +13,8 @@ def file2matrix(filename='./data/datingTestSet2.txt'):
         line2list = line.split('\t')
         classLabelsVector.append(int(line2list[-1]))
         dataMat[index, :] = line2list[:-1]
-    # print(classLabelsVector.__class__)
-    # print(dataMat.__class__)
+    print(classLabelsVector.__class__)
+    print(dataMat.__class__)
     return dataMat, classLabelsVector
 
 
