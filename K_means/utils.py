@@ -71,15 +71,15 @@ def bi_K_means(dataset, k, dist_meas=dist_eclud):
     cent_list = []
     cent_list.append(centroid_0) # 保存第一个数据中心点
     for j in range(m): # 存储分类信息和损失(也每个点到中心点的距离)
-        cluster_assment[j, 1] = dist_meas(np.array(centroid_0), dataset[j, :]) ** 2
+        cluster_assment[j, 1] = dist_meas(np.mat(centroid_0), dataset[j, :]) ** 2
     # 将数据进行再次聚类,直到满足要求. sse is 'sum of squared error'
     while (len(cent_list) < k):
         print(len(cent_list))
         lowest_sse = float('inf')
         for i in range(len(cent_list)):
             pts_in_curr_cluster = dataset[np.nonzero(cluster_assment[:, 0].A==i)[0], :]
-            # if len(pts_in_curr_cluster) == 0:
-            #     continue
+            if len(pts_in_curr_cluster) == 0:  # 有时会出现该重心周围没有数据的情况
+                continue
             centroid_mat, split_clust_ass = K_means(pts_in_curr_cluster, 2, dist_meas) # 第一个是分类,第二个是损失.
             sse_split = np.sum(split_clust_ass[:, 1]) # 统计所有数据距离中心点的距离
             sse_not_split = np.sum(cluster_assment[np.nonzero(cluster_assment[:, 0].A!=i)[0], 1]) # 统计不分割时的距离
@@ -104,59 +104,20 @@ def bi_K_means(dataset, k, dist_meas=dist_eclud):
     return cent_list, cluster_assment
 
 
-def plot_data_set(filename):
-    # 导入数据
-    datMat = load_dataset(filename)
-    # 进行k-means算法其中k为4
-    myCentroids, clustAssing = K_means(datMat, 4)
-    clustAssing = clustAssing.tolist()
-    myCentroids = myCentroids.tolist()
-    xcord = [[], [], [], []]
-    ycord = [[], [], [], []]
-    datMat = datMat.tolist()
-    m = len(clustAssing)
-    for i in range(m):
-        if int(clustAssing[i][0]) == 0:
-            xcord[0].append(datMat[i][0])
-            ycord[0].append(datMat[i][1])
-        elif int(clustAssing[i][0]) == 1:
-            xcord[1].append(datMat[i][0])
-            ycord[1].append(datMat[i][1])
-        elif int(clustAssing[i][0]) == 2:
-            xcord[2].append(datMat[i][0])
-            ycord[2].append(datMat[i][1])
-        elif int(clustAssing[i][0]) == 3:
-            xcord[3].append(datMat[i][0])
-            ycord[3].append(datMat[i][1])
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-    # 绘制样本点
-    ax.scatter(xcord[0], ycord[0], s=20, c='b', marker='*', alpha=.5)
-    ax.scatter(xcord[1], ycord[1], s=20, c='r', marker='D', alpha=.5)
-    ax.scatter(xcord[2], ycord[2], s=20, c='c', marker='>', alpha=.5)
-    ax.scatter(xcord[3], ycord[3], s=20, c='k', marker='o', alpha=.5)
-    # 绘制质心
-    ax.scatter(myCentroids[0][0], myCentroids[0][1], s=100, c='k', marker='+', alpha=.5)
-    ax.scatter(myCentroids[1][0], myCentroids[1][1], s=100, c='k', marker='+', alpha=.5)
-    ax.scatter(myCentroids[2][0], myCentroids[2][1], s=100, c='k', marker='+', alpha=.5)
-    ax.scatter(myCentroids[3][0], myCentroids[3][1], s=100, c='k', marker='+', alpha=.5)
-    plt.title('DataSet')
-    plt.xlabel('X')
-    plt.show()
-
-
 # test function
 if __name__ == '__main__':
+    # 测试load_dataset
     data = load_dataset('./data/testSet.txt')
     print(data)
     print(dist_eclud(data[0], data[1]))
     print(rand_cent(data, 4))
+    # 测试K_means
     cent, cluster = K_means(data, 4)
     print(cent)
     print(cluster)
+    # 测试bi_K_means
     data_1 = load_dataset('./data/testSet2.txt')
     cent_1, cluster_1 = bi_K_means(data_1, 3)
     print(cent_1)
     print(cluster_1)
-    plot_data_set('./data/testSet2.txt')
 
